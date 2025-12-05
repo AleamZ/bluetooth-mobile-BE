@@ -197,3 +197,4 @@ Chạy nhiều requests cùng lúc:
 - [Postman Variables](https://learning.postman.com/docs/sending-requests/variables/)
 - [Postman Scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/)
 
+

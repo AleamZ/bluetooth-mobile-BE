@@ -40,14 +40,39 @@ export const uploadImageSingle = async (req: Request, res: Response) => {
   if (!req.file) {
     throw new BadRequestException("No file provided");
   }
-  const fileUrl = req.file.path;
-  res.send({ url: fileUrl });
+  
+  // Debug: Log req.file to see what Cloudinary returns
+  console.log("Upload file object:", JSON.stringify(req.file, null, 2));
+  
+  // Cloudinary returns URL in different properties
+  // Try secure_url first (HTTPS), then url, then path
+  const fileUrl = (req.file as any).secure_url || 
+                  (req.file as any).url || 
+                  req.file.path;
+  
+  if (!fileUrl) {
+    console.error("File object keys:", Object.keys(req.file));
+    throw new BadRequestException("Failed to get file URL from Cloudinary");
+  }
+  
+  res.json({ 
+    url: fileUrl,
+    public_id: (req.file as any).public_id || null
+  });
 };
 
 export const uploadMultipleImages = async (req: Request, res: Response) => {
   if (!Array.isArray(req.files)) {
     throw new BadRequestException("Files not provided or incorrect format");
   }
-  const fileLinks = req.files.map((file: any) => file.path);
-  res.send({ urls: fileLinks });
+  
+  const fileLinks = req.files.map((file: any) => {
+    const url = file.secure_url || file.url || file.path;
+    return {
+      url: url,
+      public_id: file.public_id || null
+    };
+  });
+  
+  res.json({ urls: fileLinks });
 };
