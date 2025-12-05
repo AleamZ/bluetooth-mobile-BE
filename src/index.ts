@@ -13,11 +13,16 @@ app.use(express.json());
 const server = http.createServer(app);
 const io = configureSocketIO(server);
 const corsOptions = {
-  origin: "*",
+  origin: [
+    "https://www.bluetoothmobile.vn",
+    "http://localhost:5173",
+    "https://bluetooth-mobile-fe-git-main-aleamzs-projects.vercel.app" // thay đúng domain vercel của bạn vào đây
+  ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 };
+
 
 app.use(cors(corsOptions));
 
