@@ -18,6 +18,13 @@ import { ICustomParamsUpdate } from "../../types/custom-params-update.interface"
 import { Request, Response } from "express";
 import { BadRequestException } from "../../domain/exceptions/bad-request.exception";
 
+// Validate cloudinary configuration before creating storage
+if (!cloudinary || !cloudinary.v2 || !cloudinary.v2.uploader) {
+  throw new Error(
+    "Cloudinary is not properly configured. Please check your environment variables: CLOUND_NAME, API_CLOUND_KEY, API_CLOUND_SECRET"
+  );
+}
+
 const storage = cloudinaryStorage({
   cloudinary,
   params: {

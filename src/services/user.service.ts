@@ -36,16 +36,23 @@ export const register = async (userData: Partial<IUser>): Promise<IUser> => {
 };
 
 export const loginService = async (
-  username: string,
+  usernameOrEmail: string,
   password: string,
   userAgent: string
 ): Promise<any> => {
+  // Determine if input is email or username
+  const isEmail = usernameOrEmail.includes("@");
   const loginUserDto = Object.assign(new LoginUserDto(), {
-    username,
+    [isEmail ? "email" : "username"]: usernameOrEmail,
     password,
   });
   await validateOrReject(loginUserDto);
-  const user = await userRepository.findUserByUsername(loginUserDto.username);
+  
+  // Try to find user by username or email
+  const user = isEmail
+    ? await userRepository.findUserByEmail(usernameOrEmail)
+    : await userRepository.findUserByUsername(usernameOrEmail);
+    
   if (!user) {
     throw new BadRequestException("Tài khoản hoặc mật khẩu không đúng");
   }
