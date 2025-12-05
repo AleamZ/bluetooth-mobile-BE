@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "./node_modules/.bin/tsc",
+    "build": "tsc",
     "watch:server": "node ./dist/index.js"
   },
   "engines": {
@@ -21,7 +21,7 @@
     "body-parser": "^1.20.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
-    "cloudinary": "^1.21.0",
+    "cloudinary": "^2.8.0",
     "core-js": "^3.41.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -30,7 +30,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.6.3",
     "multer": "^1.4.5-lts.1",
-    "multer-storage-cloudinary": "^4.0.0",
+    "multer-storage-cloudinary": "^2.2.1",
     "node-cron": "^3.0.3",
     "reflect-metadata": "^0.2.2",
     "socket.io": "^4.8.1",
