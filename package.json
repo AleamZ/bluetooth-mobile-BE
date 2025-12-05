@@ -6,7 +6,14 @@
     "dev": "nodemon src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "watch:server": "node ./dist/index.js"
+    "watch:server": "node ./dist/index.js",
+    "start": "node ./dist/index.js",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop bluetooth-backend",
+    "pm2:restart": "pm2 restart bluetooth-backend",
+    "pm2:delete": "pm2 delete bluetooth-backend",
+    "pm2:logs": "pm2 logs bluetooth-backend",
+    "pm2:monit": "pm2 monit"
   },
   "engines": {
     "node": ">=16.0.0",
