@@ -11,15 +11,15 @@
 
 // const upload = multer({ storage: storage });
 
-import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinaryStorage from "multer-storage-cloudinary";
 import multer from "multer";
 import cloudinary from "../../config/cloundinary";
 import { ICustomParamsUpdate } from "../../types/custom-params-update.interface";
 import { Request, Response } from "express";
 import { BadRequestException } from "../../domain/exceptions/bad-request.exception";
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
+const storage = cloudinaryStorage({
+  cloudinary,
   params: {
     folder: "WEBBLUETOOTH" as string,
     allowedFormats: ["jpg", "png", "jpeg"],
