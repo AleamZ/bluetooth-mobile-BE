@@ -17,6 +17,7 @@ import cloudinary from "../../config/cloundinary";
 import { ICustomParamsUpdate } from "../../types/custom-params-update.interface";
 import { Request, Response } from "express";
 import { BadRequestException } from "../../domain/exceptions/bad-request.exception";
+import { catchAsync } from "../../utils/catchAsync.util";
 
 // Validate cloudinary configuration before creating storage
 if (!cloudinary || !cloudinary.v2 || !cloudinary.v2.uploader) {
@@ -34,45 +35,60 @@ const storage = cloudinaryStorage({
   } as ICustomParamsUpdate,
 });
 
-export const upload = multer({ storage: storage });
+export const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB
+  }
+});
 
-export const uploadImageSingle = async (req: Request, res: Response) => {
-  if (!req.file) {
-    throw new BadRequestException("No file provided");
+export const uploadImageSingle = catchAsync(async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      throw new BadRequestException("No file provided");
+    }
+    
+    // Debug: Log req.file to see what Cloudinary returns
+    console.log("Upload file object:", JSON.stringify(req.file, null, 2));
+    
+    // Cloudinary returns URL in different properties
+    // Try secure_url first (HTTPS), then url, then path
+    const fileUrl = (req.file as any).secure_url || 
+                    (req.file as any).url || 
+                    req.file.path;
+    
+    if (!fileUrl) {
+      console.error("File object keys:", Object.keys(req.file));
+      throw new BadRequestException("Failed to get file URL from Cloudinary");
+    }
+    
+    res.json({ 
+      url: fileUrl,
+      public_id: (req.file as any).public_id || null
+    });
+  } catch (error) {
+    console.error("Upload error:", error);
+    throw error;
   }
-  
-  // Debug: Log req.file to see what Cloudinary returns
-  console.log("Upload file object:", JSON.stringify(req.file, null, 2));
-  
-  // Cloudinary returns URL in different properties
-  // Try secure_url first (HTTPS), then url, then path
-  const fileUrl = (req.file as any).secure_url || 
-                  (req.file as any).url || 
-                  req.file.path;
-  
-  if (!fileUrl) {
-    console.error("File object keys:", Object.keys(req.file));
-    throw new BadRequestException("Failed to get file URL from Cloudinary");
-  }
-  
-  res.json({ 
-    url: fileUrl,
-    public_id: (req.file as any).public_id || null
-  });
-};
+});
 
-export const uploadMultipleImages = async (req: Request, res: Response) => {
-  if (!Array.isArray(req.files)) {
-    throw new BadRequestException("Files not provided or incorrect format");
+export const uploadMultipleImages = catchAsync(async (req: Request, res: Response) => {
+  try {
+    if (!Array.isArray(req.files)) {
+      throw new BadRequestException("Files not provided or incorrect format");
+    }
+    
+    const fileLinks = req.files.map((file: any) => {
+      const url = file.secure_url || file.url || file.path;
+      return {
+        url: url,
+        public_id: file.public_id || null
+      };
+    });
+    
+    res.json({ urls: fileLinks });
+  } catch (error) {
+    console.error("Upload multiple error:", error);
+    throw error;
   }
-  
-  const fileLinks = req.files.map((file: any) => {
-    const url = file.secure_url || file.url || file.path;
-    return {
-      url: url,
-      public_id: file.public_id || null
-    };
-  });
-  
-  res.json({ urls: fileLinks });
-};
+});

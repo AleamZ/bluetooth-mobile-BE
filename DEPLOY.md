@@ -233,8 +233,18 @@ nano cloudflared-tunnel.sh
 
 ```bash
 #!/bin/bash
+# Script để chạy Cloudflare Tunnel và lưu URL vào file
+cloudflared tunnel --url http://localhost:5000 2>&1 | tee ~/cloudflare-tunnel.log | grep -oP 'https://[a-zA-Z0-9-]+\.trycloudflare\.com' | head -1 > ~/cloudflare-url.txt &
+```
+
+**Hoặc đơn giản hơn (khuyến nghị):**
+
+```bash
+#!/bin/bash
 cloudflared tunnel --url http://localhost:5000
 ```
+
+> **Lưu ý:** URL sẽ xuất hiện trong logs khi tunnel khởi động. Xem phần 17 để biết cách lấy URL.
 
 **Lưu → phân quyền:**
 
@@ -256,17 +266,78 @@ Copy dòng lệnh PM2 đưa ra → chạy → rồi:
 pm2 save
 ```
 
-### 17. Kiểm tra tunnel
+### 17. Kiểm tra tunnel và lấy URL
+
+**Bước 1: Kiểm tra tunnel đang chạy**
 
 ```bash
 pm2 status
-pm2 logs cloudflare-tunnel
 ```
 
-Sẽ thấy:
+✅ Nếu thấy `cloudflare-tunnel` là **online** là OK.
 
+**Bước 2: Xem logs để tìm URL**
+
+```bash
+pm2 logs cloudflare-tunnel --lines 100
 ```
-https://meaningful-dee-variations-macintosh.trycloudflare.com
+
+Hoặc xem logs real-time:
+
+```bash
+pm2 logs cloudflare-tunnel --raw
+```
+
+**Bước 3: Tìm URL trong logs**
+
+URL thường xuất hiện với format `https://xxxxx.trycloudflare.com`. Tìm bằng cách:
+
+```bash
+pm2 logs cloudflare-tunnel | grep -i "trycloudflare"
+```
+
+Hoặc xem toàn bộ logs và tìm dòng có chứa `https://`:
+
+```bash
+pm2 logs cloudflare-tunnel --lines 200 | grep "https://"
+```
+
+**Bước 4: Nếu không thấy URL trong logs**
+
+Có thể URL chỉ xuất hiện khi tunnel khởi động. Thử restart và xem logs ngay:
+
+```bash
+pm2 restart cloudflare-tunnel
+pm2 logs cloudflare-tunnel --lines 50 --raw
+```
+
+**Bước 5: Cách khác - Chạy tunnel trực tiếp để lấy URL**
+
+Nếu vẫn không thấy, chạy tunnel trực tiếp một lần để lấy URL:
+
+```bash
+# Stop tunnel trong PM2 tạm thời
+pm2 stop cloudflare-tunnel
+
+# Chạy tunnel trực tiếp để xem URL
+cloudflared tunnel --url http://localhost:5000
+```
+
+Sẽ hiện URL ngay, ví dụ:
+```
++--------------------------------------------------------------------------------------------+
+|  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable): |
+|  https://xxxxx.trycloudflare.com                                                           |
++--------------------------------------------------------------------------------------------+
+```
+
+**Copy URL này**, sau đó:
+- Nhấn `CTRL + C` để dừng
+- Chạy lại với PM2:
+
+```bash
+pm2 start cloudflare-tunnel
+pm2 save
 ```
 
 ✅ Đây là domain backend HTTPS chính thức.
@@ -419,15 +490,58 @@ pm2 list
    curl http://localhost:5000
    ```
 
-2. Restart tunnel:
+2. Kiểm tra tunnel có đang chạy:
+   ```bash
+   pm2 status cloudflare-tunnel
+   ```
+
+3. Restart tunnel:
    ```bash
    pm2 restart cloudflare-tunnel
    ```
 
-3. Xem log chi tiết:
+4. Xem log chi tiết:
    ```bash
-   pm2 logs cloudflare-tunnel --lines 50
+   pm2 logs cloudflare-tunnel --lines 100
    ```
+
+5. Tìm URL trong logs:
+   ```bash
+   pm2 logs cloudflare-tunnel | grep -i "trycloudflare\|https://"
+   ```
+
+6. Nếu không thấy URL, chạy tunnel trực tiếp để debug:
+   ```bash
+   pm2 stop cloudflare-tunnel
+   cloudflared tunnel --url http://localhost:5000
+   ```
+   (Sau khi thấy URL, nhấn CTRL+C và chạy lại với PM2)
+
+### Không thấy URL Cloudflare Tunnel trong PM2 logs
+
+**Giải pháp 1: Xem logs với nhiều dòng hơn**
+```bash
+pm2 logs cloudflare-tunnel --lines 200
+```
+
+**Giải pháp 2: Tìm URL bằng grep**
+```bash
+pm2 logs cloudflare-tunnel | grep "https://.*trycloudflare"
+```
+
+**Giải pháp 3: Xem logs real-time khi restart**
+```bash
+pm2 restart cloudflare-tunnel
+pm2 logs cloudflare-tunnel --raw
+```
+
+**Giải pháp 4: Chạy tunnel trực tiếp để lấy URL**
+```bash
+pm2 stop cloudflare-tunnel
+cloudflared tunnel --url http://localhost:5000
+# Copy URL hiển thị, sau đó CTRL+C và chạy lại với PM2
+pm2 start cloudflare-tunnel
+```
 
 ### CORS Error
 
