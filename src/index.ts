@@ -16,7 +16,9 @@ const corsOptions = {
   origin: [
     "https://www.bluetoothmobile.vn",
     "http://localhost:5173",
-    "https://bluetooth-mobile-fe-git-main-aleamzs-projects.vercel.app" // thay đúng domain vercel của bạn vào đây
+    "https://bluetooth-mobile-fe-git-main-aleamzs-projects.vercel.app",
+    "https://bluetooth-mobile-git-main-aleamzs-projects.vercel.app",
+    "https://bluetooth-mobile-ejwqrhdxa-aleamzs-projects.vercel.app" // thay đúng domain vercel của bạn vào đây
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
