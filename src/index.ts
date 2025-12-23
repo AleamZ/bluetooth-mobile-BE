@@ -15,6 +15,7 @@ const io = configureSocketIO(server);
 const corsOptions = {
   origin: [
     "https://www.bluetoothmobile.vn",
+    "www.bluetoothmobile.vn",
     "http://localhost:5173",
     "https://bluetooth-mobile-fe-git-main-aleamzs-projects.vercel.app",
     "https://bluetooth-mobile-git-main-aleamzs-projects.vercel.app",
