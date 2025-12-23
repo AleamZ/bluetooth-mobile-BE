@@ -16,7 +16,19 @@ import {
 import { successResponse } from "../../utils/response-success.util";
 import { HttpStatus } from "../../domain/enums/http-status.enum";
 
+const normalizeImageUrls = (imageUrls: any): string[] => {
+  if (!Array.isArray(imageUrls)) return [];
+  return imageUrls
+    .map((item) => (typeof item === "string" ? item : item?.url))
+    .filter((url): url is string => Boolean(url));
+};
+
 export const createProductController = async (req: Request, res: Response) => {
+  // Allow FE to send array of { url, public_id } and convert to string[]
+  if (req.body.imageUrls) {
+    req.body.imageUrls = normalizeImageUrls(req.body.imageUrls);
+  }
+
   const newProduct = await createProductService(req.body);
   res.json(
     successResponse(
